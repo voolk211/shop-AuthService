@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004
+      author: vyacheslav
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          tableExists:
+            tableName: refresh_tokens
+      changes:
+        - createTable:
+            tableName: refresh_tokens
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_refresh_tokens_user
+                    references: users(id)
+                    onDelete: CASCADE
+                    onUpdate: RESTRICT
+              - column:
+                  name: refresh_token
+                  type: TEXT
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+        - createIndex:
+            indexName: idx_refresh_tokens_user_id
+            tableName: refresh_tokens
+            columns:
+              - column:
+                  name: user_id

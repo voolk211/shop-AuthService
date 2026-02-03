@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007
+      author: vyacheslav
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM user_roles WHERE user_id=1 AND role_id=1
+      changes:
+        - insert:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: role_id
+                  valueNumeric: 1
+        - insert:
+            tableName: user_roles
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 2
+              - column:
+                  name: role_id
+                  valueNumeric: 2

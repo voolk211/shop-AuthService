@@ -1,0 +1,40 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006
+      author: vyacheslav
+      preConditions:
+        onFail: MARK_RAN
+        sqlCheck:
+          expectedResult: 0
+          sql: SELECT COUNT(*) FROM users WHERE username='admin'
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: username
+                  value: admin
+              - column:
+                  name: password
+                  value: "$2a$10$Xl0yhvzLIaJCDdKBS0Lld.ksK7c2Zytg/ZKFdtIYYQUv8rUfvCR4W"
+              - column:
+                  name: active
+                  valueBoolean: true
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: username
+                  value: user
+              - column:
+                  name: password
+                  value: "$2a$10$Xl0yhvzLIaJCDdKBS0Lld.ksK7c2Zytg/ZKFdtIYYQUv8rUfvCR4W"
+              - column:
+                  name: active
+                  valueBoolean: true
