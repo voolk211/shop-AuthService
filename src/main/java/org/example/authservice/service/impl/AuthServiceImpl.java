@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public User register(User user) {
+    public void register(User user) {
         if (userRepository.existsUserByUsername(user.getUsername())) {
             throw new IllegalArgumentException("User already exists.");
         }
@@ -58,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setActive(true);
 
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     private RefreshToken createRefreshToken(User user, JwtUserDetails userDetails){

@@ -6,7 +6,7 @@ import org.example.authservice.model.entities.User;
 
 public interface AuthService {
 
-    User register(User user);
+    void register(User user);
 
     TokenResponse login(LoginRequest loginRequest);
 
