@@ -25,7 +25,6 @@ public class JwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-
     public String generateAccessToken(JwtUserDetails userDetails, Instant now, Instant expiration) {
         Claims claims = Jwts.claims()
                 .subject(userDetails.getUsername())
@@ -84,10 +83,6 @@ public class JwtTokenProvider {
 
     public String getUsername(String token){
         return parseClaims(token).getSubject();
-    }
-
-    public Long getId(String token){
-        return parseClaims(token).get("userId", Long.class);
     }
 
 }

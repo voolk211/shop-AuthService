@@ -61,28 +61,6 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
     }
 
-    private RefreshToken createRefreshToken(User user, JwtUserDetails userDetails){
-        Instant now = Instant.now();
-        Instant refreshExpiresAt = now.plusMillis(refreshValidityInMs);
-
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails, now, refreshExpiresAt);
-
-        RefreshToken entityRefreshToken = new RefreshToken();
-        entityRefreshToken.setToken(refreshToken);
-        entityRefreshToken.setUser(user);
-        entityRefreshToken.setCreatedAt(now);
-        entityRefreshToken.setExpiresAt(refreshExpiresAt);
-
-        return entityRefreshToken;
-    }
-
-    private String createAccessToken(JwtUserDetails userDetails){
-        Instant now = Instant.now();
-        Instant accessExpiresAt = now.plusMillis(accessValidityInMs);
-
-        return jwtTokenProvider.generateAccessToken(userDetails, now, accessExpiresAt);
-    }
-
     @Override
     @Transactional
     public TokenResponse login(LoginRequest loginRequest) {
@@ -135,12 +113,32 @@ public class AuthServiceImpl implements AuthService {
         return new TokenResponse(user.getUsername(), newAccessToken, newRefreshToken);
     }
 
-
     @Override
     @Transactional
     public void validateToken(String token) {
         jwtTokenProvider.validateAccessToken(token);
     }
 
+    private RefreshToken createRefreshToken(User user, JwtUserDetails userDetails){
+        Instant now = Instant.now();
+        Instant refreshExpiresAt = now.plusMillis(refreshValidityInMs);
+
+        String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails, now, refreshExpiresAt);
+
+        RefreshToken entityRefreshToken = new RefreshToken();
+        entityRefreshToken.setToken(refreshToken);
+        entityRefreshToken.setUser(user);
+        entityRefreshToken.setCreatedAt(now);
+        entityRefreshToken.setExpiresAt(refreshExpiresAt);
+
+        return entityRefreshToken;
+    }
+
+    private String createAccessToken(JwtUserDetails userDetails){
+        Instant now = Instant.now();
+        Instant accessExpiresAt = now.plusMillis(accessValidityInMs);
+
+        return jwtTokenProvider.generateAccessToken(userDetails, now, accessExpiresAt);
+    }
 
 }
