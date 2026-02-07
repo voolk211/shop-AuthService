@@ -2,11 +2,17 @@ package org.example.authservice.service.impl;
 
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import org.example.authservice.exception.PasswordMismatchException;
+import org.example.authservice.exception.ResourceNotFoundException;
+import org.example.authservice.model.dto.auth.AddRoleRequest;
 import org.example.authservice.model.dto.auth.LoginRequest;
 import org.example.authservice.model.dto.auth.TokenResponse;
+import org.example.authservice.model.dto.user.UserDto;
 import org.example.authservice.model.entities.RefreshToken;
 import org.example.authservice.model.entities.Role;
+import org.example.authservice.model.entities.RoleName;
 import org.example.authservice.model.entities.User;
+import org.example.authservice.model.mappers.UserMapper;
 import org.example.authservice.repository.RefreshTokenRepository;
 import org.example.authservice.repository.RoleRepository;
 import org.example.authservice.repository.UserRepository;
@@ -44,13 +50,19 @@ public class AuthServiceImpl implements AuthService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final UserMapper userMapper;
+
     @Override
     @Transactional
-    public void register(User user) {
+    public void register(UserDto userDto) {
+        if (!userDto.getPassword().equals(userDto.getPasswordConfirmation())) {
+            throw new PasswordMismatchException("Password and password confirmation do not match.");
+        }
+        User user = userMapper.toEntity(userDto);
         if (userRepository.existsUserByUsername(user.getUsername())) {
             throw new IllegalArgumentException("User already exists.");
         }
-        Role role = roleRepository.findByName("ROLE_USER")
+        Role role = roleRepository.findByName(RoleName.ROLE_USER)
                 .orElseThrow(() -> new IllegalStateException("Default role ROLE_USER not found"));
 
         user.setRoles(Set.of(role));
@@ -70,18 +82,9 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.getReferenceById(userDetails.getId());
 
-        Instant now = Instant.now();
-        Instant accessExpiresAt = now.plusMillis(accessValidityInMs);
-        Instant refreshExpiresAt = now.plusMillis(refreshValidityInMs);
-
-        String accessToken = jwtTokenProvider.generateAccessToken(userDetails, now, accessExpiresAt);
-        String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails, now, refreshExpiresAt);
-
-        RefreshToken entityRefreshToken = new RefreshToken();
-        entityRefreshToken.setToken(refreshToken);
-        entityRefreshToken.setUser(user);
-        entityRefreshToken.setCreatedAt(now);
-        entityRefreshToken.setExpiresAt(refreshExpiresAt);
+        RefreshToken entityRefreshToken = createRefreshToken(user, userDetails);
+        String accessToken = createAccessToken(userDetails);
+        String refreshToken = entityRefreshToken.getToken();
 
         refreshTokenRepository.save(entityRefreshToken);
 
@@ -95,10 +98,6 @@ public class AuthServiceImpl implements AuthService {
 
         RefreshToken refreshToken = refreshTokenRepository.findByToken(token)
                 .orElseThrow(() -> new JwtException("Refresh token not found"));
-
-        if (refreshToken.getExpiresAt().isBefore(Instant.now())) {
-            throw new JwtException("Refresh token expired");
-        }
 
         User user = refreshToken.getUser();
         JwtUserDetails userDetails = new JwtUserDetails(user);
@@ -114,9 +113,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional
     public void validateToken(String token) {
         jwtTokenProvider.validateAccessToken(token);
+    }
+
+    @Override
+    @Transactional
+    public void addRoleToUser(Long userId, AddRoleRequest addRoleRequest){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        Role role = roleRepository.findByName(addRoleRequest.getRoleName())
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+        user.getRoles().add(role);
+        userRepository.save(user);
     }
 
     private RefreshToken createRefreshToken(User user, JwtUserDetails userDetails){
@@ -140,5 +149,6 @@ public class AuthServiceImpl implements AuthService {
 
         return jwtTokenProvider.generateAccessToken(userDetails, now, accessExpiresAt);
     }
+
 
 }

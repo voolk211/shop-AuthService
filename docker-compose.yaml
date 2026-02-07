@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  auth-service:
+  auth_service:
     env_file:
       - .env
     build: .

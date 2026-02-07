@@ -7,6 +7,8 @@ import org.example.authservice.exception.PasswordMismatchException;
 import org.example.authservice.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
@@ -54,6 +56,16 @@ public class ControllerAdvice {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ExceptionBody> handleIllegalArgument(IllegalArgumentException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionBody(e.getMessage()));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ExceptionBody> handleAccessDenied(AccessDeniedException e){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ExceptionBody(e.getMessage()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionBody> handleHttpMessageNotReadable(HttpMessageNotReadableException e){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ExceptionBody(e.getMessage()));
     }
 

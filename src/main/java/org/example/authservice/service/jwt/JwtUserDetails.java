@@ -27,7 +27,7 @@ public class JwtUserDetails implements UserDetails {
         this.active = user.isActive();
 
         this.authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .map(role -> new SimpleGrantedAuthority(role.toString()))
                 .toList();
     }
 

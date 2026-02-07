@@ -67,22 +67,37 @@ public class JwtTokenProvider {
                 .getPayload();
     }
 
-    public void validateAccessToken(String token){
-             Claims claims = parseClaims(token);
-             if (!"ACCESS".equals(claims.get("tokenType"))) {
-                 throw new JwtException("Not an access token");
-         }
+    public void validateAccessToken(String token) {
+        Claims claims = parseClaims(token);
+        if (!"ACCESS".equals(claims.get("tokenType"))) {
+            throw new JwtException("Not an access token");
+        }
+        validateExpiration(claims);
     }
 
-    public void validateRefreshToken(String token){
+    public void validateRefreshToken(String token) {
         Claims claims = parseClaims(token);
         if (!"REFRESH".equals(claims.get("tokenType"))) {
             throw new JwtException("Not a refresh token");
         }
+        validateExpiration(claims);
     }
 
-    public String getUsername(String token){
+    public String getUsername(String token) {
         return parseClaims(token).getSubject();
     }
+
+    private void validateExpiration(Claims claims) {
+        Date expiration = claims.getExpiration();
+
+        if (expiration == null) {
+            throw new JwtException("Token does not contain expiration");
+        }
+
+        if (expiration.toInstant().isBefore(Instant.now())) {
+            throw new JwtException("Token expired");
+        }
+    }
+
 
 }

@@ -12,11 +12,11 @@ public class UserDto {
     private String username;
 
     @NotBlank(message = "Password must not be blank")
-    @Length(min = 3, max = 255, message = "Password length must be between 8 and 255 characters")
+    @Length(min = 3, max = 255, message = "Password length must be between 3 and 255 characters")
     private String password;
 
     @NotBlank(message = "Password confirmation must not be blank")
-    @Length(min = 3, max = 255, message = "Password confirmation length must be between 8 and 255 characters")
+    @Length(min = 3, max = 255, message = "Password confirmation length must be between 3 and 255 characters")
     private String passwordConfirmation;
 
 }
