@@ -1,0 +1,13 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    change-log: classpath:liquibase/db.changelog.yaml
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    access: ${JWT_ACCESS_EXPIRATION}
+    refresh: ${JWT_REFRESH_EXPIRATION}
