@@ -1,12 +1,12 @@
 package org.example.authservice.model.mappers;
 
-import org.example.authservice.model.dto.user.UserDto;
-import org.example.authservice.model.entities.User;
+import org.example.authservice.model.dto.auth.RegistrationRequest;
+import org.example.authservice.model.dto.user.CreateUser;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    User toEntity(UserDto userDto);
+    CreateUser toCreateUserRequest(RegistrationRequest registrationRequest);
 
 }

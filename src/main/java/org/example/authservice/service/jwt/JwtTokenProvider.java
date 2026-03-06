@@ -83,9 +83,9 @@ public class JwtTokenProvider {
         validateExpiration(claims);
     }
 
-    public String getUsername(String token) {
-        return parseClaims(token).getSubject();
-    }
+//    public String getUsername(String token) {
+//        return parseClaims(token).getSubject();
+//    }
 
     private void validateExpiration(Claims claims) {
         Date expiration = claims.getExpiration();
