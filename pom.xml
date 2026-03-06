@@ -35,18 +35,18 @@
         <jjwt.version>0.12.5</jjwt.version>
         <liquibase.version>4.27.0</liquibase.version>
         <springdoc.version>2.5.0</springdoc.version>
-        <preliquibase.version>1.5.0</preliquibase.version>
-        <minio.version>8.5.10</minio.version>
-        <xml-format.version>3.3.1</xml-format.version>
-        <checkstyle.version>3.3.1</checkstyle.version>
-        <graphql-java-kickstart.version>15.2.0</graphql-java-kickstart.version>
-        <graphql-java-extended-scalars.version>22.0</graphql-java-extended-scalars.version>
-        <junit-jupiter.version>5.10.2</junit-jupiter.version>
-        <mockito.version>5.11.0</mockito.version>
-        <jacoco.version>0.8.12</jacoco.version>
-        <mybatis.version>3.0.3</mybatis.version>
     </properties>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2023.0.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
 
         <dependency>
@@ -78,19 +78,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>com.graphql-java-kickstart</groupId>
-            <artifactId>graphql-java-kickstart</artifactId>
-            <version>${graphql-java-kickstart.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.graphql-java</groupId>
-            <artifactId>graphql-java-extended-scalars</artifactId>
-            <version>${graphql-java-extended-scalars.version}</version>
         </dependency>
 
         <dependency>
@@ -157,12 +144,6 @@
         </dependency>
 
         <dependency>
-            <groupId>net.lbruun.springboot</groupId>
-            <artifactId>preliquibase-spring-boot-starter</artifactId>
-            <version>${preliquibase.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
             <version>${junit-jupiter.version}</version>
@@ -170,12 +151,19 @@
         </dependency>
 
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

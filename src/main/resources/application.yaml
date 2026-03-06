@@ -11,3 +11,17 @@ security:
     secret: ${JWT_SECRET}
     access: ${JWT_ACCESS_EXPIRATION}
     refresh: ${JWT_REFRESH_EXPIRATION}
+user:
+  service:
+    url: ${USER_SERVICE_URL}
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-service:
+        sliding-window-size: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state:
+          seconds: 10
+internal:
+  service-secret: ${SERVICE_SECRET}
+  internal-secret: ${INTERNAL_SECRET}

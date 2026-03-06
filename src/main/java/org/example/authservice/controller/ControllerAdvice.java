@@ -5,6 +5,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.example.authservice.exception.ExceptionBody;
 import org.example.authservice.exception.PasswordMismatchException;
 import org.example.authservice.exception.ResourceNotFoundException;
+import org.example.authservice.exception.UserServiceUnavailableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,6 +23,11 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ControllerAdvice {
+
+    @ExceptionHandler(UserServiceUnavailableException.class)
+    public ResponseEntity<ExceptionBody> handleUserServiceUnavailable(UserServiceUnavailableException e){
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ExceptionBody(e.getMessage()));
+    }
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ExceptionBody> handleJwt(JwtException e){

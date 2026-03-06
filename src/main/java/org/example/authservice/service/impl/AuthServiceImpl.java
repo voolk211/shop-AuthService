@@ -1,13 +1,18 @@
 package org.example.authservice.service.impl;
 
+import feign.FeignException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.example.authservice.client.UserClient;
 import org.example.authservice.exception.PasswordMismatchException;
 import org.example.authservice.exception.ResourceNotFoundException;
+import org.example.authservice.exception.UserServiceUnavailableException;
 import org.example.authservice.model.dto.auth.AddRoleRequest;
 import org.example.authservice.model.dto.auth.LoginRequest;
+import org.example.authservice.model.dto.auth.RegistrationRequest;
 import org.example.authservice.model.dto.auth.TokenResponse;
-import org.example.authservice.model.dto.user.UserDto;
+import org.example.authservice.model.dto.user.CreateUser;
 import org.example.authservice.model.entities.RefreshToken;
 import org.example.authservice.model.entities.Role;
 import org.example.authservice.model.entities.RoleName;
@@ -20,6 +25,7 @@ import org.example.authservice.service.AuthService;
 import org.example.authservice.service.jwt.JwtTokenProvider;
 import org.example.authservice.service.jwt.JwtUserDetails;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,6 +38,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class AuthServiceImpl implements AuthService {
 
     @Value("${security.jwt.access}")
@@ -48,29 +55,50 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    private final UserClient userClient;
+
     private final JwtTokenProvider jwtTokenProvider;
 
     private final UserMapper userMapper;
 
     @Override
     @Transactional
-    public void register(UserDto userDto) {
-        if (!userDto.getPassword().equals(userDto.getPasswordConfirmation())) {
+    public void register(RegistrationRequest registrationRequest) {
+        if (!registrationRequest.getPassword().equals(registrationRequest.getPasswordConfirmation())) {
             throw new PasswordMismatchException("Password and password confirmation do not match.");
         }
-        User user = userMapper.toEntity(userDto);
-        if (userRepository.existsUserByUsername(user.getUsername())) {
+
+        if (userRepository.existsUserByUsername(registrationRequest.getName())) {
             throw new IllegalArgumentException("User already exists.");
         }
-        Role role = roleRepository.findByName(RoleName.ROLE_USER)
-                .orElseThrow(() -> new IllegalStateException("Default role ROLE_USER not found"));
 
-        user.setRoles(Set.of(role));
-        user.setId(null);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setActive(true);
+        Long userId = null;
+        try {
+            CreateUser userRequest = userMapper.toCreateUserRequest(registrationRequest);
+            CreateUser createdUser = userClient.createUser(userRequest);
 
-        userRepository.save(user);
+            User user = new User();
+            Role role = roleRepository.findByName(RoleName.ROLE_USER)
+                    .orElseThrow(() -> new IllegalStateException("Default role ROLE_USER not found"));
+
+            user.setRoles(Set.of(role));
+            userId = createdUser.getId();
+            user.setId(createdUser.getId());
+            user.setUsername(createdUser.getName());
+            user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+            userRepository.save(user);
+
+        }
+        catch (FeignException | DataAccessException e) {
+            if (userId != null) {
+                try {
+                    userClient.deleteUser(userId);
+                } catch (Exception ex) {
+                    log.error("Compensation failed for userId {}", userId, ex);
+                }
+            }
+            throw new UserServiceUnavailableException("Registration failed", e);
+        }
     }
 
     @Override
