@@ -107,8 +107,6 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-
-
     @Override
     @Transactional
     public TokenResponse login(LoginRequest loginRequest) {
