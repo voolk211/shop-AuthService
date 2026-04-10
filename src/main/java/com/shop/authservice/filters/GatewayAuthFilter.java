@@ -37,7 +37,7 @@ public class GatewayAuthFilter extends OncePerRequestFilter {
                 path.startsWith("/api/auth/refresh") ||
                 path.startsWith("/api/auth/validate") ||
                 path.startsWith("/actuator/health/liveness") ||
-                path.startsWith("/actuator/health/readiness")){
+                path.startsWith("/actuator/health/readiness")) {
             filterChain.doFilter(request, response);
             return;
         }
