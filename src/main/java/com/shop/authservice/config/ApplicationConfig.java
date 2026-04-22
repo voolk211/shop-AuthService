@@ -83,15 +83,17 @@ public class ApplicationConfig {
                                     response.getWriter().write("Forbidden.");
                                 })
                 )
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers("/api/auth/register").permitAll()
-                                .requestMatchers("/api/auth/login").permitAll()
-                                .requestMatchers("/api/auth/refresh").permitAll()
-                                .requestMatchers("/api/auth/validate").permitAll()
-                                .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**").permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/api/auth/validate",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/actuator/health/liveness",
+                                "/actuator/health/readiness"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(gatewayAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
